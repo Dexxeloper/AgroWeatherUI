@@ -363,8 +363,10 @@ with tab1:
         end_date = st.date_input("📅 Конечная дата:", date_max, min_value=date_min, max_value=date_max)
     
     if start_date <= end_date:
-        analysis_df = df_filtered[(df_filtered["date"].dt.date >= start_date) & 
-                                 (df_filtered["date"].dt.date <= end_date)]
+        start_datetime = pd.Timestamp(start_date)
+        end_datetime = pd.Timestamp(end_date) + pd.Timedelta(days=1)
+        mask = (df_filtered["date"] >= start_datetime) & (df_filtered["date"] < end_datetime)
+        analysis_df = df_filtered[mask].copy()
         
         if len(analysis_df) > 0:
             # Modern interactive charts with Plotly
