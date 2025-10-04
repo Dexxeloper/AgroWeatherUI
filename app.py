@@ -8,9 +8,7 @@ import folium
 from streamlit_folium import st_folium
 from datetime import datetime, timedelta
 import numpy as np
-import streamlit as st
 st.write("App started successfully!")
-import streamlit as st
 st.write("App starting on port 8501...")
 # Page configuration
 st.set_page_config(
