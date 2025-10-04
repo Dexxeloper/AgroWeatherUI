@@ -1,6 +1,1 @@
-streamlit>=1.28.0
-pandas
-plotly
-folium==0.14.0
-streamlit-folium
-numpy
+"streamlit\npandas\nplotly\nfolium\nstreamlit-folium\nnumpy" 
