@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 import numpy as np
 st.write("App started successfully!")
 st.write("App starting on port 8501...")
+
 # Page configuration
 st.set_page_config(
     page_title="🌾 Агро-Погода Казахстана",
@@ -277,22 +278,17 @@ def generate_sample_data():
     data = []
     for date in dates:
         for region in regions:
-            # Seasonal temperature variation
             day_of_year = date.timetuple().tm_yday
             base_temp = 15 + 20 * np.sin((day_of_year - 80) * 2 * np.pi / 365)
             temp = base_temp + np.random.normal(0, 5)
-            
-            # Precipitation with seasonal variation
             precip_base = 2 + 3 * np.sin((day_of_year - 120) * 2 * np.pi / 365)
             precip = max(0, precip_base + np.random.exponential(2))
-            
             data.append({
                 'date': date,
                 'temperature_C': round(temp, 1),
                 'precipitation_mm': round(precip, 1),
                 'region': region
             })
-    
     return pd.DataFrame(data)
 
 # Load or generate data
@@ -348,15 +344,11 @@ with tab1:
     with st.expander("💡 Как использовать аналитику?", expanded=False):
         st.markdown("""
         🔍 **Выбор периода:** Используйте календарь для анализа конкретного временного промежутка
-        
         📊 **Интерактивные графики:** Наведите курсор для детальной информации
-        
         🎯 **Рекомендации:** Система автоматически анализирует условия и дает советы
-        
         📱 **Мобильная версия:** Все графики адаптированы для мобильных устройств
         """)
     
-    # Date range selector
     col1, col2 = st.columns(2)
     with col1:
         start_date = st.date_input("📅 Начальная дата:", date_min, min_value=date_min, max_value=date_max)
@@ -370,14 +362,12 @@ with tab1:
         analysis_df = df_filtered[mask].copy()
         
         if len(analysis_df) > 0:
-            # Modern interactive charts with Plotly
             fig = make_subplots(
                 rows=2, cols=1,
                 subplot_titles=('🌡️ Температура (°C)', '🌧️ Осадки (мм)'),
                 vertical_spacing=0.12
             )
             
-            # Temperature chart
             fig.add_trace(
                 go.Scatter(
                     x=analysis_df['date'],
@@ -391,7 +381,6 @@ with tab1:
                 row=1, col=1
             )
             
-            # Precipitation chart
             fig.add_trace(
                 go.Bar(
                     x=analysis_df['date'],
@@ -417,14 +406,12 @@ with tab1:
             
             st.plotly_chart(fig, use_container_width=True)
             
-            # Statistics and recommendations
             avg_temp = analysis_df["temperature_C"].mean()
             avg_precip = analysis_df["precipitation_mm"].mean()
             max_temp = analysis_df["temperature_C"].max()
             min_temp = analysis_df["temperature_C"].min()
             total_precip = analysis_df["precipitation_mm"].sum()
             
-            # Beautiful metric cards
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
@@ -459,7 +446,6 @@ with tab1:
                 </div>
                 """, unsafe_allow_html=True)
             
-            # Smart recommendations with enhanced styling
             st.markdown("### 🎯 Умные рекомендации")
             
             if avg_temp > 30 and avg_precip < 1:
@@ -530,12 +516,10 @@ with tab2:
     with st.expander("🎮 Правила игры", expanded=False):
         st.markdown("""
         🎯 **Цель:** Принимайте правильные решения о посадке на основе погодных условий
-        
         🌱 **Культуры:** Каждая культура имеет свои оптимальные условия:
         - **Пшеница:** 15-25°C, осадки 1-4 мм
         - **Кукуруза:** 22-30°C, осадки 2-6 мм  
         - **Рис:** 24-32°C, осадки ≥5 мм
-        
         ⭐ **Очки:** Получайте баллы за правильные решения
         """)
     
@@ -548,13 +532,11 @@ with tab2:
         if st.button("🎲 Новые условия", key="new_conditions"):
             st.rerun()
     
-    # Get random weather conditions
     row = df_filtered.sample(1).iloc[0]
     date = pd.to_datetime(row["date"]).date()
     temp = row["temperature_C"]
     rain = row["precipitation_mm"]
     
-    # Weather display with beautiful cards
     col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown(f"""
@@ -593,7 +575,6 @@ with tab2:
     if plant or wait:
         st.session_state["rounds"] += 1
         
-        # Enhanced crop logic with detailed feedback
         outcome = "neutral"
         message = "🤔 Умеренные условия."
         detailed_advice = ""
@@ -640,36 +621,25 @@ with tab2:
                 message = "❄️ Недостаточно тепла для риса."
                 detailed_advice = "Рис — тропическая культура, требующая высоких температур."
         
-        # Enhanced decision feedback with animations
         if plant:
             if outcome == "good":
                 st.success(f"👍 {message}")
                 st.info(f"💡 **Детали:** {detailed_advice}")
                 st.balloons()
                 st.session_state["score"] += 1
-                
-                # Success image
                 st.markdown("""
                 <div style="text-align: center; margin: 1rem 0;">
-                    <div class="pulse-animation">
-                        <img src="https://media.giphy.com/media/26ufcVAp3AiepbFm0/giphy.gif" 
-                             style="border-radius: 15px; max-width: 300px;" alt="Success"/>
-                    </div>
                     <p style="color: var(--success-green); font-weight: 600; margin-top: 1rem;">
                         🌱 Отличное решение! Урожай будет богатым!
                     </p>
                 </div>
                 """, unsafe_allow_html=True)
-                
             elif outcome == "bad":
                 st.error(f"👎 {message}")
                 st.info(f"💡 **Детали:** {detailed_advice}")
                 st.session_state["fails"] += 1
-                
                 st.markdown("""
                 <div style="text-align: center; margin: 1rem 0;">
-                    <img src="https://media.giphy.com/media/3o7TKwmnDgQb5jemjK/giphy.gif" 
-                         style="border-radius: 15px; max-width: 300px;" alt="Problem"/>
                     <p style="color: var(--danger-red); font-weight: 600; margin-top: 1rem;">
                         💔 К сожалению, урожай пострадает...
                     </p>
@@ -678,11 +648,8 @@ with tab2:
             else:
                 st.info(f"😐 {message}")
                 st.info(f"💡 **Детали:** {detailed_advice}")
-                
                 st.markdown("""
                 <div style="text-align: center; margin: 1rem 0;">
-                    <img src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif" 
-                         style="border-radius: 15px; max-width: 300px;" alt="Neutral"/>
                     <p style="color: var(--primary-green); font-weight: 600; margin-top: 1rem;">
                         🤷‍♂️ Средний результат
                     </p>
@@ -701,7 +668,6 @@ with tab2:
             else:
                 st.info(f"🙂 Решение подождать разумно в таких условиях.")
         
-        # Enhanced statistics display
         st.markdown("---")
         st.markdown("### 📊 Ваша статистика фермера")
         
@@ -759,14 +725,12 @@ with tab3:
         - Смотрите на дату и осадки
         - Угадывайте температуру с помощью слайдера
         - Чем точнее угадаете, тем больше очков получите
-        
         🏆 **Система очков:**
         - ±2°C = Отлично! (+1 балл)
         - ±5°C = Хорошо!
         - >5°C = Попробуйте ещё раз
         """)
     
-    # Get random data for guessing game
     row = df_filtered.sample(1).iloc[0]
     date = pd.to_datetime(row["date"]).date()
     true_temp = row["temperature_C"]
@@ -814,52 +778,37 @@ with tab3:
         st.session_state["rounds"] += 1
         diff = abs(true_temp - guess)
         
-        # Beautiful result display with enhanced feedback
         if diff <= 2:
             st.balloons()
             st.success(f"🎯 Невероятно точно! Температура была {true_temp:.1f}°C")
             st.session_state["score"] += 1
-            
             st.markdown("""
             <div style="text-align: center; margin: 1rem 0;">
-                <div class="pulse-animation">
-                    <img src="https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif" 
-                         style="border-radius: 15px; max-width: 250px;" alt="Excellent"/>
-                </div>
                 <p style="color: var(--success-green); font-weight: 600; margin-top: 1rem;">
                     🏆 Вы настоящий эксперт по погоде!
                 </p>
             </div>
             """, unsafe_allow_html=True)
-            
         elif diff <= 5:
             st.info(f"🙂 Хорошая попытка! Температура была {true_temp:.1f}°C (разница {diff:.1f}°C)")
-            
             st.markdown("""
             <div style="text-align: center; margin: 1rem 0;">
-                <img src="https://media.giphy.com/media/3oriO5t2QB4IPKgxHi/giphy.gif" 
-                     style="border-radius: 15px; max-width: 250px;" alt="Good"/>
                 <p style="color: var(--primary-green); font-weight: 600; margin-top: 1rem;">
                     👍 Неплохая интуиция!
                 </p>
             </div>
             """, unsafe_allow_html=True)
-            
         else:
             st.error(f"😕 Не угадали. Температура была {true_temp:.1f}°C (разница {diff:.1f}°C)")
             st.session_state["fails"] += 1
-            
             st.markdown("""
             <div style="text-align: center; margin: 1rem 0;">
-                <img src="https://media.giphy.com/media/3o7TKTDn976rzVgky4/giphy.gif" 
-                     style="border-radius: 15px; max-width: 250px;" alt="Try again"/>
                 <p style="color: var(--warning-orange); font-weight: 600; margin-top: 1rem;">
                     🤷‍♂️ Не расстраивайтесь, попробуйте ещё!
                 </p>
             </div>
             """, unsafe_allow_html=True)
         
-        # Tips for improvement
         month = date.month
         season_tip = ""
         if month in [12, 1, 2]:
@@ -877,10 +826,8 @@ with tab3:
 with tab4:
     st.markdown("### 🌍 Глобальные климатические тренды")
     
-    # Interactive world map with climate data
     st.markdown("#### 🗺️ Интерактивная карта климата")
     
-    # Sample global climate data
     climate_data = [
         {"name": "Казахстан 🇰🇿", "lat": 48.0, "lon": 67.0, "temp": 25, "rain": 3, "region": "Центральная Азия"},
         {"name": "США 🇺🇸", "lat": 39.0, "lon": -98.0, "temp": 30, "rain": 2, "region": "Северная Америка"},
@@ -891,11 +838,9 @@ with tab4:
         {"name": "ЮАР 🇿🇦", "lat": -30.0, "lon": 25.0, "temp": 26, "rain": 3, "region": "Африка"}
     ]
     
-    # Create Folium map
     m = folium.Map(location=[20, 0], zoom_start=2, tiles="CartoDB positron")
     
     for location in climate_data:
-        # Color coding for temperature
         if location["temp"] > 30:
             color = "red"
         elif location["temp"] > 20:
@@ -903,7 +848,6 @@ with tab4:
         else:
             color = "blue"
         
-        # Create popup with climate info
         popup_text = f"""
         <div style="font-family: Inter; min-width: 200px;">
             <h4 style="margin: 0; color: #2E8B57;">{location['name']}</h4>
@@ -924,19 +868,15 @@ with tab4:
             fillOpacity=0.7
         ).add_to(m)
     
-    # Display map
     map_data = st_folium(m, width=700, height=400)
     
-    # Climate comparison charts
     st.markdown("#### 📊 Сравнение климатических показателей")
     
-    # Create DataFrame for comparison
     climate_df = pd.DataFrame(climate_data)
     
     col1, col2 = st.columns(2)
     
     with col1:
-        # Temperature comparison
         fig_temp = px.bar(
             climate_df,
             x="name",
@@ -955,7 +895,6 @@ with tab4:
         st.plotly_chart(fig_temp, use_container_width=True)
     
     with col2:
-        # Precipitation comparison
         fig_precip = px.bar(
             climate_df,
             x="name",
@@ -972,9 +911,6 @@ with tab4:
             xaxis_tickangle=-45
         )
         st.plotly_chart(fig_precip, use_container_width=True)
-    
-    # Scatter plot for climate patterns
-    st.markdown("#### 🔍 Анализ климатических паттернов")
     
     fig_scatter = px.scatter(
         climate_df,
@@ -998,7 +934,6 @@ with tab4:
 with tab5:
     st.markdown("### 🎓 Агрономическое образование")
     
-    # Educational sections with enhanced styling
     education_sections = [
         {
             "title": "🌱 Основы растениеводства",
@@ -1009,7 +944,6 @@ with tab5:
             - **Водный баланс:** Важность правильного соотношения полива и дренажа
             - **Питательные вещества:** NPK (азот, фосфор, калий) - основа питания растений
             - **Севооборот:** Чередование культур для сохранения плодородия почвы
-            
             **Практические советы:**
             - Изучайте прогнозы погоды минимум на 7 дней вперед
             - Ведите дневник наблюдений за растениями
@@ -1024,12 +958,10 @@ with tab5:
             - Континентальный климат
             - Оптимально для: пшеница, ячмень, овёс
             - Особенности: короткое лето, суровая зима
-            
             **Южный Казахстан:**
             - Аридный и семиаридный климат
             - Оптимально для: хлопок, рис, бахчевые
             - Особенности: жаркое лето, мягкая зима
-            
             **Восточный Казахстан:**
             - Умеренно континентальный
             - Оптимально для: картофель, овощи, кормовые
@@ -1044,12 +976,10 @@ with tab5:
             - **ГТК (Гидротермический коэффициент):** Отношение осадков к температуре
             - **Сумма активных температур:** Накопленное тепло за вегетационный период
             - **Индекс засушливости:** Показатель дефицита влаги
-            
             **Практическое применение:**
             - ГТК > 1.3 - избыточное увлажнение
             - ГТК 1.0-1.3 - достаточное увлажнение  
             - ГТК < 1.0 - недостаточное увлажнение
-            
             **Современные технологии:**
             - Спутниковые данные MODIS
             - Метеостанции IoT
@@ -1066,7 +996,6 @@ with tab5:
             </div>
             """, unsafe_allow_html=True)
     
-    # Interactive quiz section
     st.markdown("### 🧠 Проверьте свои знания")
     
     quiz_questions = [
@@ -1140,7 +1069,6 @@ with tab5:
 with tab6:
     st.markdown("### 🎮 Симулятор фермерского хозяйства")
     
-    # Initialize farm simulation state
     if "farm_money" not in st.session_state:
         st.session_state.farm_money = 1000
     if "farm_crops" not in st.session_state:
@@ -1148,14 +1076,12 @@ with tab6:
     if "farm_season" not in st.session_state:
         st.session_state.farm_season = 1
     if "farm_weather" not in st.session_state:
-        # Generate random weather for this season
         st.session_state.farm_weather = {
             "temp": round(random.uniform(15, 35), 1),
             "rain": round(random.uniform(0, 10), 1),
             "description": random.choice(["Солнечно", "Облачно", "Дождливо", "Ветрено"])
         }
     
-    # Farm dashboard
     st.markdown("#### 🏡 Ваше фермерское хозяйство")
     
     col1, col2, col3, col4 = st.columns(4)
@@ -1195,7 +1121,6 @@ with tab6:
         </div>
         """, unsafe_allow_html=True)
     
-    # Current weather display
     st.markdown("#### 🌤️ Текущая погода")
     weather = st.session_state.farm_weather
     
@@ -1207,10 +1132,8 @@ with tab6:
     with col3:
         st.metric("☁️ Условия", weather['description'])
     
-    # Farming actions
     st.markdown("#### 🚜 Действия фермера")
     
-    # Crop prices and costs
     crop_data = {
         "Пшеница": {"cost": 50, "profit": 80, "optimal_temp": (15, 25), "optimal_rain": (1, 4)},
         "Кукуруза": {"cost": 70, "profit": 120, "optimal_temp": (22, 30), "optimal_rain": (2, 6)},
@@ -1241,23 +1164,18 @@ with tab6:
             for crop_name, crop_area in st.session_state.farm_crops.items():
                 if crop_area > 0:
                     if st.button(f"Собрать {crop_name} ({crop_area} га)", key=f"harvest_{crop_name}"):
-                        # Calculate harvest success based on weather
                         crop_info = crop_data[crop_name]
                         weather = st.session_state.farm_weather
-                        
                         temp_ok = crop_info["optimal_temp"][0] <= weather["temp"] <= crop_info["optimal_temp"][1]
                         rain_ok = crop_info["optimal_rain"][0] <= weather["rain"] <= crop_info["optimal_rain"][1]
-                        
                         success_rate = 1.0
                         if not temp_ok:
                             success_rate *= 0.7
                         if not rain_ok:
                             success_rate *= 0.8
-                        
                         harvest_profit = int(crop_info["profit"] * crop_area * success_rate)
                         st.session_state.farm_money += harvest_profit
                         st.session_state.farm_crops[crop_name] = 0
-                        
                         if success_rate >= 0.9:
                             st.balloons()
                             st.success(f"🏆 Отличный урожай! Получено {harvest_profit}₸")
@@ -1265,15 +1183,12 @@ with tab6:
                             st.info(f"✅ Хороший урожай! Получено {harvest_profit}₸")
                         else:
                             st.warning(f"⚠️ Урожай пострадал от погоды. Получено {harvest_profit}₸")
-                        
                         st.rerun()
         else:
             st.info("Нет посевов для сбора урожая")
     
-    # Next season button
     if st.button("⏭️ Перейти к следующему сезону", key="next_season"):
         st.session_state.farm_season += 1
-        # Generate new weather
         st.session_state.farm_weather = {
             "temp": round(random.uniform(10, 40), 1),
             "rain": round(random.uniform(0, 12), 1),
@@ -1282,7 +1197,6 @@ with tab6:
         st.success(f"🌅 Наступил {st.session_state.farm_season}-й сезон!")
         st.rerun()
     
-    # Farm statistics
     st.markdown("#### 📊 Статистика фермы")
     
     if st.session_state.farm_season > 1:
@@ -1295,21 +1209,17 @@ with tab6:
         else:
             st.info("💼 Вы работаете в ноль")
     
-    # Tips for farming success
     with st.expander("💡 Советы для успешного фермерства", expanded=False):
         st.markdown("""
         🎯 **Стратегии успеха:**
-        
         **🌾 Культуры и климат:**
         - Пшеница: лучше всего при 15-25°C и умеренных осадках
         - Кукуруза: требует тепла (22-30°C) и достаточной влаги
         - Рис: самая прибыльная, но нужно много воды и тепла
-        
         **💰 Экономика:**
         - Рис дает наибольшую прибыль, но имеет высокие затраты
         - Пшеница - самый безопасный выбор для начинающих
         - Следите за погодой перед посадкой и сбором урожая
-        
         **⚡ Тактические советы:**
         - Не вкладывайте все деньги в одну культуру
         - Собирайте урожай при благоприятной погоде
